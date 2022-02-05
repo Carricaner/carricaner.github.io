@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://darrenli1256.github.io/hugo-test/posts/my-first-post/</loc>
+    <lastmod>2022-02-04T18:37:51+08:00</lastmod>
+  </url><url>
+    <loc>https://darrenli1256.github.io/hugo-test/</loc>
+    <lastmod>2022-02-04T18:37:51+08:00</lastmod>
+  </url><url>
+    <loc>https://darrenli1256.github.io/hugo-test/posts/</loc>
+    <lastmod>2022-02-04T18:37:51+08:00</lastmod>
+  </url><url>
+    <loc>https://darrenli1256.github.io/hugo-test/categories/</loc>
+  </url><url>
+    <loc>https://darrenli1256.github.io/hugo-test/tags/</loc>
+  </url>
+</urlset>
