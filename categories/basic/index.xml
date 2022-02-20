@@ -1,0 +1,14 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Basic - Category - My New Hugo Site</title>
+        <link>https://carrican.github.io/categories/basic/</link>
+        <description>Basic - Category - My New Hugo Site</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sat, 12 Feb 2022 23:31:49 &#43;0800</lastBuildDate><atom:link href="https://carrican.github.io/categories/basic/" rel="self" type="application/rss+xml" /><item>
+    <title>My First Post</title>
+    <link>https://carrican.github.io/first-post/</link>
+    <pubDate>Sat, 12 Feb 2022 23:31:49 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>https://carrican.github.io/first-post/</guid>
+    <description><![CDATA[This is the summary in front]]></description>
+</item></channel>
+</rss>
