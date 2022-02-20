@@ -6,16 +6,12 @@
 
 ### 重新弄一個 repo 來測試上面 header 是否可以顯示categories & tags
 
-### Test Title
-### Test Title
-### Test Title
-### Test Title
-
-### Test Title
-### Test Title
-### Test Title
-### Test Title
-### Test Title
+### Test Title 123
+### Test Title 123
+### Test Title 123
+### Test Title 123
+### Test Title 123
+### Test Title 123
 
 
 $$ c = \pm\sqrt{a^2 + b^2} $$
