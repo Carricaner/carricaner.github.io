@@ -71,7 +71,7 @@
 
 示意圖：
 {{< mermaid >}}
-graph TD;
+graph LR;
    A([Client])-->|1. Require| B{TC}
    B-->|2. OK?| C[(cohort A)]
    B-->|2. OK?| D[(cohort B)]
@@ -153,12 +153,12 @@ graph TD;
 
 示意圖如下：
 {{< mermaid >}}
-graph TD;
+graph LR;
    A([Client])-->|1. Require| B{TC}
    B-->|2. OK?| C[(帳戶 A)]
    B-->|2. OK?| D[(帳戶 B)]
    C-->|3. Yes!| B
-   D-->|3. No...| B
+   D-.->|3. No ...| B
    B-->|4. Abort| C
    B-->|4. Abort| D
    B-->|5. Fail!| A
@@ -185,13 +185,14 @@ graph TD;
    
 4. TC 向帳戶 A, B 傳送放棄的命令 ( abort ) 
    
+
 5. TC 回傳轉帳失敗的訊息給使用者。
 
 <br>
 
 示意圖如下：
 {{< mermaid >}}
-graph TD;
+graph LR;
    A([Client])-->|1. Require| B{TC}
    B-->|2. OK?| C[(帳戶 A)]
    B-->|2. OK?| D[(帳戶 B)]
@@ -266,7 +267,7 @@ graph TD;
 示意圖：
 
 {{< mermaid >}}
-graph TD;
+graph LR;
    A([Client])-->|1. Require| B{TC}
    B-->|2. OK?| C[(帳戶 A)]
    B-->|2. OK?| D[(帳戶 B)]
@@ -299,7 +300,9 @@ graph TD;
 
 發現不管設計怎麼樣的方法都無法保證兩軍一定可以在同一時間進攻，所以這個問題基本上是無解的。
 
-兩軍問題就是對現代每個節點使用網際網路彼此進行溝通的影射。我們沒有完美的辦法，但是可以思索出可接受的辦法。
+兩軍問題就是對現代每個節點使用網際網路彼此進行溝通的影射。
+
+我們沒有完美的辦法，但是可以思索出可接受的辦法。
 
 <br>
 
