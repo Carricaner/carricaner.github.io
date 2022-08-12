@@ -22,7 +22,7 @@
 
 <br>
 
-{{< figure src="images/unplash-atm-spot.jpeg" caption="*Photo by Eduardo Soares on Unsplash*">}}
+{{< figure src="images/unplash-atm-spot.jpeg" caption="*Photo by Eduardo Soares in Unsplash*">}}
 
 <br>
 
