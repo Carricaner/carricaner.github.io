@@ -1,0 +1,611 @@
+<!doctype html><html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=robots content="noodp">
+<meta http-equiv=x-ua-compatible content="IE=edge, chrome=1">
+<title>Intro to AOP & AspectJ - Darren's Blog</title><meta name=Description content="簡單介紹如何使用 AspectJ 實作 AOP"><meta property="og:title" content="Intro to AOP & AspectJ">
+<meta property="og:description" content="簡單介紹如何使用 AspectJ 實作 AOP">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://carrican.github.io/aspectj/"><meta property="og:image" content="https://carrican.github.io/aspectj/images/waeving-unsplash.jpeg"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2022-11-26T20:21:43+08:00">
+<meta property="article:modified_time" content="2022-11-26T20:21:43+08:00"><meta property="og:site_name" content="Darren's Blog">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="https://carrican.github.io/aspectj/images/waeving-unsplash.jpeg">
+<meta name=twitter:title content="Intro to AOP & AspectJ">
+<meta name=twitter:description content="簡單介紹如何使用 AspectJ 實作 AOP">
+<meta name=application-name content="Darren's Blog">
+<meta name=apple-mobile-web-app-title content="Darren's Blog"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico>
+<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
+<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://carrican.github.io/aspectj/><link rel=prev href=https://carrican.github.io/state-machine/><link rel=stylesheet href=/lib/normalize/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=/lib/fontawesome-free/all.min.css><link rel=stylesheet href=/lib/animate/animate.min.css><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Intro to AOP \u0026 AspectJ","inLanguage":"en","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/carrican.github.io\/aspectj\/"},"image":[{"@type":"ImageObject","url":"https:\/\/carrican.github.io\/aspectj\/images\/waeving-unsplash.jpeg","width":5184,"height":3456}],"genre":"posts","keywords":"Java, Design, AOP, weaving, aspect, joinpoint, pointcut, advice, logging, immutable, domain","wordcount":775,"url":"https:\/\/carrican.github.io\/aspectj\/","datePublished":"2022-11-26T20:21:43+08:00","dateModified":"2022-11-26T20:21:43+08:00","publisher":{"@type":"Organization","name":""},"author":{"@type":"Person","name":"Darren"},"description":"簡單介紹如何使用 AspectJ 實作 AOP"}</script></head>
+<body header-desktop=fixed header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem('theme')?localStorage.getItem('theme')==='dark':'light'==='auto'?window.matchMedia('(prefers-color-scheme: dark)').matches:'light'==='dark')&&document.body.setAttribute('theme','dark')</script>
+<div id=mask></div><div class=wrapper><header class=desktop id=header-desktop>
+<div class=header-wrapper>
+<div class=header-title>
+<a href=/ title="Darren's Blog"><span class=header-title-pre><i class="fas fa-cog fa-spin"></i></span> Darren's Blog</a>
+</div>
+<div class=menu>
+<div class=menu-inner><a class=menu-item href=/posts/> Posts </a><a class=menu-item href=/tags/> Tags </a><a class=menu-item href=/categories/> Categories </a><span class="menu-item delimiter"></span><span class="menu-item search" id=search-desktop>
+<input type=text placeholder="Search titles or contents..." id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=Search>
+<i class="fas fa-search fa-fw"></i>
+</a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=Clear>
+<i class="fas fa-times-circle fa-fw"></i>
+</a>
+<span class="search-button search-loading" id=search-loading-desktop>
+<i class="fas fa-spinner fa-fw fa-spin"></i>
+</span>
+</span><a href=javascript:void(0); class="menu-item theme-switch" title="Switch Theme">
+<i class="fas fa-adjust fa-fw"></i>
+</a>
+</div>
+</div>
+</div>
+</header><header class=mobile id=header-mobile>
+<div class=header-container>
+<div class=header-wrapper>
+<div class=header-title>
+<a href=/ title="Darren's Blog"><span class=header-title-pre><i class="fas fa-cog fa-spin"></i></span> Darren's Blog</a>
+</div>
+<div class=menu-toggle id=menu-toggle-mobile>
+<span></span><span></span><span></span>
+</div>
+</div>
+<div class=menu id=menu-mobile><div class=search-wrapper>
+<div class="search mobile" id=search-mobile>
+<input type=text placeholder="Search titles or contents..." id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=Search>
+<i class="fas fa-search fa-fw"></i>
+</a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=Clear>
+<i class="fas fa-times-circle fa-fw"></i>
+</a>
+<span class="search-button search-loading" id=search-loading-mobile>
+<i class="fas fa-spinner fa-fw fa-spin"></i>
+</span>
+</div>
+<a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>
+Cancel
+</a>
+</div><a class=menu-item href=/posts/ title>Posts</a><a class=menu-item href=/tags/ title>Tags</a><a class=menu-item href=/categories/ title>Categories</a><a href=javascript:void(0); class="menu-item theme-switch" title="Switch Theme">
+<i class="fas fa-adjust fa-fw"></i>
+</a></div>
+</div>
+</header>
+<div class="search-dropdown desktop">
+<div id=search-dropdown-desktop></div>
+</div>
+<div class="search-dropdown mobile">
+<div id=search-dropdown-mobile></div>
+</div>
+<main class=main>
+<div class=container><div class=toc id=toc-auto>
+<h2 class=toc-title>Contents</h2>
+<div class="toc-content always-active" id=toc-content-auto></div>
+</div><article class="page single"><h1 class="single-title animated flipInX">Intro to AOP & AspectJ</h1><div class=post-meta>
+<div class=post-meta-line><span class=post-author><a href=/ title=Author rel=author class=author><i class="fas fa-user-circle fa-fw"></i>Darren</a></span>&nbsp;<span class=post-category>included in <a href=/categories/programming-paradigm/><i class="far fa-folder fa-fw"></i>Programming Paradigm</a></span></div>
+<div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-11-26>2022-11-26</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;775 words&nbsp;
+<i class="far fa-clock fa-fw"></i>&nbsp;4 minutes&nbsp;</div>
+</div><div class="details toc" id=toc-static kept>
+<div class="details-summary toc-title">
+<span>Contents</span>
+<span><i class="details-icon fas fa-angle-right"></i></span>
+</div>
+<div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents>
+<ul>
+<li><a href=#前言-a-idprefacea>前言 <a id=preface></a></a></li>
+<li><a href=#本文-a-idmain-contenta>本文 <a id=main-content></a></a>
+<ul>
+<li><a href=#相關名詞介紹a-idterm-introa>相關名詞介紹<a id=term-intro></a></a>
+<ul>
+<li><a href=#aop--aspect-oriented-programming->AOP ( Aspect-Oriented Programming )</a></li>
+<li><a href=#join-point>Join point</a></li>
+<li><a href=#pointcut>Pointcut</a></li>
+<li><a href=#advice>Advice</a></li>
+<li><a href=#aspect>Aspect</a></li>
+</ul>
+</li>
+<li><a href=#使用-aspectja-idaspectja>使用 AspectJ<a id=aspectj></a></a>
+<ul>
+<li><a href=#安裝>安裝</a></li>
+<li><a href=#情境一加入日誌--logging-a-idexample-1-logginga>情境一：加入日誌 ( Logging )<a id=example-1-logging></a></a></li>
+<li><a href=#情境二檢查物件--validation-a-idexample-2-validationa>情境二：檢查物件 ( Validation )<a id=example-2-validation></a></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href=#總結a-idconclusiona>總結<a id=conclusion></a></a></li>
+<li><a href=#參考a-idrefsa>參考<a id=refs></a></a></li>
+</ul>
+</nav></div>
+</div><div class=content id=content><h2 id=前言-a-idprefacea>前言 <a id=preface></a></h2>
+<p>一直都有聽說 AOP ( Aspect-Oriented Programming ) 的概念，但是一直沒有真正的動手實作。</p>
+<p>利用這次寫這篇文章的機會，簡單整理一下 AOP 相關的概念以及實作。</p>
+<p>( Fact: 在跟 2022年 say goodbye 之前，補一下部落格發文進度 😏 )</p>
+<br>
+<figure><img src=images/waeving-unsplash.jpeg alt="Photo by Yaniv Knobel in Unsplash"><figcaption>
+<p><em>Photo by Yaniv Knobel in Unsplash</em></p>
+</figcaption>
+</figure>
+<br>
+<h2 id=本文-a-idmain-contenta>本文 <a id=main-content></a></h2>
+<h3 id=相關名詞介紹a-idterm-introa>相關名詞介紹<a id=term-intro></a></h3>
+<h4 id=aop--aspect-oriented-programming->AOP ( Aspect-Oriented Programming )</h4>
+<div class="details admonition quote open">
+<div class="details-summary admonition-title">
+<i class="icon fas fa-quote-right fa-fw"></i>AOP's definition<i class="details-icon fas fa-angle-right fa-fw"></i>
+</div>
+<div class=details-content>
+<div class=admonition-content>剖面導向程式設計 (AOP) 是電腦科學中的一種程式設計泛型，旨在將橫切關注點與業務主體進行進一步分離，以提高程式碼的模組化程度 &mdash; wiki</div>
+</div>
+</div>
+<p>再用下面這張圖來說明：
+<br>
+<figure><img src=images/aop-demo.png alt="Photo derived from Konstantin&amp;rsquo;s article"><figcaption>
+<p><em>Photo derived from <a href=https://codegym.cc/groups/posts/543-what-is-aop-principles-of-aspect-oriented-programming>Konstantin&rsquo;s article</a></em></p>
+</figcaption>
+</figure>
+<br></p>
+<p>AOP 設計利用橫切的方式( cross-cutting ) 來加入額外邏輯。</p>
+<p>像是圖中的「日誌 (Logging)」以及「安全驗證 (Security)」，這樣一來就可以避免在各個既有模組中一一加入邏輯，處理起來複雜、耗時且難以維護。
+<br></p>
+<h4 id=join-point>Join point</h4>
+<p>切面設計的切入點，會需要搭配 Pointcut 。</p>
+<h4 id=pointcut>Pointcut</h4>
+<p>一種特殊的通用表示式 ( Regular Expression ) ，被用來定義是在哪些情況下應該要切入，並且依附某個切入點 ( Join Point )。</p>
+<h4 id=advice>Advice</h4>
+<p>進入切入點之後要執行的邏輯。</p>
+<h4 id=aspect>Aspect</h4>
+<p>為收集各個地方的 cross-cutting concerns 之後獨立且可以重用的物件，通常一個 Aspect 會專注在一種邏輯上，像是日誌等等。</p>
+<p>以上名詞之間的關係如下圖：</p>
+<br>
+<figure><img src=images/aop-integration.jpeg alt="Photo derived from openhom.cc ( 感謝良葛格對台灣技術的貢獻，本人從中受益良多，R.I.P. &amp;ndash; 2022/11 )"><figcaption>
+<p><em>Photo derived from <a href=https://openhome.cc/Gossip/SpringGossip/AOPConcept.html>openhom.cc</a> <br>( 感謝良葛格對台灣技術的貢獻，本人從中受益良多，R.I.P. &ndash; 2022/11 )</em></p>
+</figcaption>
+</figure>
+<br>
+<h3 id=使用-aspectja-idaspectja>使用 AspectJ<a id=aspectj></a></h3>
+<div class="details admonition question open">
+<div class="details-summary admonition-title">
+<i class="icon fas fa-question-circle fa-fw"></i>What is AspectJ ?<i class="details-icon fas fa-angle-right fa-fw"></i>
+</div>
+<div class=details-content>
+<div class=admonition-content>AspectJ 是一種實現 AOP 的 Java 擴充套件 &mdash; wiki</div>
+</div>
+</div>
+<br>
+<h4 id=安裝>安裝</h4>
+<p>For Maven</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-xml data-lang=xml><span class=nt>&lt;dependency&gt;</span>
+    <span class=nt>&lt;groupId&gt;</span>org.aspectj<span class=nt>&lt;/groupId&gt;</span>
+    <span class=nt>&lt;artifactId&gt;</span>aspectjrt<span class=nt>&lt;/artifactId&gt;</span>
+    <span class=nt>&lt;version&gt;</span>1.9.9.1<span class=nt>&lt;/version&gt;</span>
+
+    <span class=nt>&lt;groupId&gt;</span>org.aspectj<span class=nt>&lt;/groupId&gt;</span>
+    <span class=nt>&lt;artifactId&gt;</span>aspectjweaver<span class=nt>&lt;/artifactId&gt;</span>
+    <span class=nt>&lt;version&gt;</span>1.9.9.1<span class=nt>&lt;/version&gt;</span>
+<span class=nt>&lt;/dependency&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><br>
+<h4 id=情境一加入日誌--logging-a-idexample-1-logginga>情境一：加入日誌 ( Logging )<a id=example-1-logging></a></h4>
+<p>💡 假如我們想要針對 <code>org.sample.entity</code> 目錄底下所有的物件，在呼叫 <code>getters</code> & <code>setters</code> 的前後都紀錄我們客製化的日誌。</p>
+<br>
+<p>目錄底下的物件<code>Car</code></p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=kn>package</span> <span class=nn>org.example.entity</span><span class=o>;</span>
+
+<span class=kd>public</span> <span class=kd>class</span> <span class=nc>Car</span> <span class=o>{</span>
+  <span class=kd>private</span> <span class=n>String</span> <span class=n>name</span><span class=o>;</span>
+
+  <span class=kd>public</span> <span class=nf>Car</span><span class=o>(</span><span class=n>String</span> <span class=n>name</span><span class=o>)</span> <span class=o>{</span>
+    <span class=k>this</span><span class=o>.</span><span class=na>name</span> <span class=o>=</span> <span class=n>name</span><span class=o>;</span>
+  <span class=o>}</span>
+
+  <span class=kd>public</span> <span class=n>String</span> <span class=nf>getName</span><span class=o>()</span> <span class=o>{</span>
+    <span class=k>return</span> <span class=n>name</span><span class=o>;</span>
+  <span class=o>}</span>
+
+  <span class=kd>public</span> <span class=kt>void</span> <span class=nf>setName</span><span class=o>(</span><span class=n>String</span> <span class=n>name</span><span class=o>)</span> <span class=o>{</span>
+    <span class=k>this</span><span class=o>.</span><span class=na>name</span> <span class=o>=</span> <span class=n>name</span><span class=o>;</span>
+  <span class=o>}</span>
+<span class=o>}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>新增一個<code>EntityAspect</code>來處理這個橫切邏輯。</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=kn>package</span> <span class=nn>org.example.aop</span><span class=o>;</span>
+
+<span class=kn>import</span> <span class=nn>java.util.logging.Logger</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.JoinPoint</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.After</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.Aspect</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.Before</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.Pointcut</span><span class=o>;</span>
+
+<span class=nd>@Aspect</span>
+<span class=kd>public</span> <span class=kd>class</span> <span class=nc>EntityAspect</span> <span class=o>{</span>
+  <span class=kd>private</span> <span class=kd>final</span> <span class=n>Logger</span> <span class=n>logger</span> <span class=o>=</span> <span class=n>Logger</span><span class=o>.</span><span class=na>getLogger</span><span class=o>(</span><span class=n>EntityAspect</span><span class=o>.</span><span class=na>class</span><span class=o>.</span><span class=na>getName</span><span class=o>());</span>
+
+  <span class=nd>@Pointcut</span><span class=o>(</span><span class=s>&#34;execution(* org.example.entity.*.get*()) &#34;</span>
+      <span class=o>+</span> <span class=s>&#34;|| execution(* org.example.entity.*.set*(..))&#34;</span><span class=o>)</span>
+  <span class=kd>public</span> <span class=kt>void</span> <span class=nf>getterAndSetterJointPoint</span><span class=o>()</span> <span class=o>{}</span>
+
+  <span class=nd>@Before</span><span class=o>(</span><span class=s>&#34;getterAndSetterJointPoint()&#34;</span><span class=o>)</span>
+  <span class=kd>public</span> <span class=kt>void</span> <span class=nf>beforeGetterAndSetterAdvice</span><span class=o>()</span> <span class=o>{</span>
+    <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;[EntityAspect] --&gt; Before advice executed!&#34;</span><span class=o>);</span>
+  <span class=o>}</span>
+
+  <span class=nd>@After</span><span class=o>(</span><span class=s>&#34;getterAndSetterJointPoint()&#34;</span><span class=o>)</span>
+  <span class=kd>public</span> <span class=kt>void</span> <span class=nf>afterGetterAndSetterAdvice</span><span class=o>()</span> <span class=o>{</span>
+    <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;[EntityAspect] --&gt; After advice executed!&#34;</span><span class=o>);</span>
+  <span class=o>}</span>
+
+<span class=o>}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>@Pointcut</code>中的表示式包含 jointpoint signature ( 範例中為 <code>execution</code>) 以及 regular expression ( 範例中為 <code>* org.example.entity.*.get*()</code>)。</p>
+<p>其中還可以搭配邏輯運算元 ( 範例中為 <code>||</code> )，更多的規則可以參考<a href=https://cloud.tencent.com/developer/article/1497814>連結</a>。</p>
+<p><code>@Before</code> & <code>@After</code> 指定 Advice 的邏輯是在 Join point 之前還是之後執行，裡面填入要綁定的 Pointcut method ( 範例中為<code>getterAndSetterJointPoint()</code> )。</p>
+<br>
+<p>在測試中看看結果</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=kn>import</span> <span class=nn>org.example.entity.Car</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.junit.jupiter.api.Test</span><span class=o>;</span>
+
+<span class=kd>class</span> <span class=nc>RawTest</span> <span class=o>{</span>
+  <span class=nd>@Test</span>
+  <span class=kt>void</span> <span class=nf>testGetterAdnSetter</span><span class=o>()</span> <span class=o>{</span>
+    <span class=n>Car</span> <span class=n>car</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Car</span><span class=o>(</span><span class=s>&#34;SpeedWagon&#34;</span><span class=o>);</span>
+    <span class=n>System</span><span class=o>.</span><span class=na>out</span><span class=o>.</span><span class=na>println</span><span class=o>(</span><span class=s>&#34;The car&#39;s name: &#34;</span> <span class=o>+</span> <span class=n>car</span><span class=o>.</span><span class=na>getName</span><span class=o>());</span>
+  <span class=o>}</span>
+
+  <span class=c1>// Output:
+</span><span class=c1></span>  <span class=c1>// Nov 28, 2022 3:06:22 PM org.example.aop.EntityAspect beforeGetterAndSetterAdvice
+</span><span class=c1></span>  <span class=c1>// INFO: [EntityAspect] --&gt; Before advice executed!
+</span><span class=c1></span>  <span class=c1>// Nov 28, 2022 3:06:22 PM org.example.aop.EntityAspect afterGetterAndSetterAdvice
+</span><span class=c1></span>  <span class=c1>// INFO: [EntityAspect] --&gt; After advice executed!
+</span><span class=c1></span>  <span class=c1>// Car&#39;s name: SpeedWagon
+</span><span class=c1></span><span class=o>}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到在呼叫 getter 的前 ( Before ) 後 ( After ) 成功橫切插入我們要執行的邏輯。</p>
+<br>
+<h4 id=情境二檢查物件--validation-a-idexample-2-validationa>情境二：檢查物件 ( Validation )<a id=example-2-validation></a></h4>
+<p>💡 假如我們想要針對 <code>org.sample.entity</code> 目錄底下所有的物件在使用 <code>new</code> 來產生 instance 的時候，檢查裡面的欄位是否符合我們要的邏輯。</p>
+<br>
+<p>目錄底下的物件<code>Triangle</code></p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=kn>package</span> <span class=nn>org.example.entity</span><span class=o>;</span>
+
+<span class=kn>import</span> <span class=nn>java.util.Optional</span><span class=o>;</span>
+
+<span class=kd>public</span> <span class=kd>class</span> <span class=nc>Triangle</span> <span class=o>{</span>
+  <span class=kd>private</span> <span class=kt>float</span><span class=o>[]</span> <span class=n>sides</span><span class=o>;</span>
+
+  <span class=kd>public</span> <span class=nf>Triangle</span><span class=o>(</span><span class=kt>float</span><span class=o>[]</span> <span class=n>sides</span><span class=o>)</span> <span class=o>{</span>
+    <span class=k>this</span><span class=o>.</span><span class=na>sides</span> <span class=o>=</span> <span class=n>sides</span><span class=o>;</span>
+  <span class=o>}</span>
+
+  <span class=c1>// To validate if the triangle is a valid one.
+</span><span class=c1></span>  <span class=kd>public</span> <span class=n>Optional</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span> <span class=nf>validateTheTriangle</span><span class=o>()</span> <span class=o>{</span>
+    <span class=k>if</span> <span class=o>(</span><span class=n>sides</span><span class=o>.</span><span class=na>length</span> <span class=o>!=</span> <span class=n>3</span><span class=o>)</span> <span class=k>return</span> <span class=n>Optional</span><span class=o>.</span><span class=na>of</span><span class=o>(</span><span class=s>&#34;Sides number must be 3.&#34;</span><span class=o>);</span>
+
+    <span class=k>for</span> <span class=o>(</span><span class=kt>float</span> <span class=n>side</span> <span class=o>:</span> <span class=n>sides</span><span class=o>)</span> <span class=o>{</span>
+      <span class=k>if</span> <span class=o>(</span><span class=n>side</span> <span class=o>&lt;=</span> <span class=n>0</span><span class=o>)</span> <span class=k>return</span> <span class=n>Optional</span><span class=o>.</span><span class=na>of</span><span class=o>(</span><span class=s>&#34;Sides must be larger than 0.&#34;</span><span class=o>);</span>
+      <span class=k>if</span> <span class=o>(</span><span class=n>sides</span><span class=o>[</span><span class=n>0</span><span class=o>]</span> <span class=o>+</span> <span class=n>sides</span><span class=o>[</span><span class=n>1</span><span class=o>]</span> <span class=o>&lt;=</span> <span class=n>sides</span><span class=o>[</span><span class=n>2</span><span class=o>]</span>
+          <span class=o>||</span> <span class=n>sides</span><span class=o>[</span><span class=n>1</span><span class=o>]</span> <span class=o>+</span> <span class=n>sides</span><span class=o>[</span><span class=n>2</span><span class=o>]</span> <span class=o>&lt;=</span> <span class=n>sides</span><span class=o>[</span><span class=n>0</span><span class=o>]</span>
+          <span class=o>||</span> <span class=n>sides</span><span class=o>[</span><span class=n>0</span><span class=o>]</span> <span class=o>+</span> <span class=n>sides</span><span class=o>[</span><span class=n>2</span><span class=o>]</span> <span class=o>&lt;=</span> <span class=n>sides</span><span class=o>[</span><span class=n>1</span><span class=o>])</span>
+        <span class=k>return</span> <span class=n>Optional</span><span class=o>.</span><span class=na>of</span><span class=o>(</span><span class=s>&#34;The sides cannot form a triangle.&#34;</span><span class=o>);</span>
+    <span class=o>}</span>
+
+    <span class=k>return</span> <span class=n>Optional</span><span class=o>.</span><span class=na>empty</span><span class=o>();</span>
+  <span class=o>}</span>
+<span class=o>}</span>
+</code></pre></td></tr></table>
+</div>
+</div><br>
+<p>新增一個<code>TriangleAspect</code>來處理這個橫切邏輯。</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=kn>package</span> <span class=nn>org.example.aop</span><span class=o>;</span>
+
+<span class=kn>import</span> <span class=nn>java.util.Optional</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>java.util.logging.Logger</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.JoinPoint</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.After</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.Aspect</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.aspectj.lang.annotation.Pointcut</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.example.entity.Triangle</span><span class=o>;</span>
+
+<span class=nd>@Aspect</span>
+<span class=kd>public</span> <span class=kd>class</span> <span class=nc>TriangleAspect</span> <span class=o>{</span>
+  <span class=kd>private</span> <span class=kd>final</span> <span class=n>Logger</span> <span class=n>logger</span> <span class=o>=</span> <span class=n>Logger</span><span class=o>.</span><span class=na>getLogger</span><span class=o>(</span><span class=n>TriangleAspect</span><span class=o>.</span><span class=na>class</span><span class=o>.</span><span class=na>getName</span><span class=o>());</span>
+
+  <span class=nd>@Pointcut</span><span class=o>(</span><span class=s>&#34;execution(org.example.entity.*.new(..))&#34;</span><span class=o>)</span>
+  <span class=kd>public</span> <span class=kt>void</span> <span class=nf>triangleJointPoint</span><span class=o>()</span> <span class=o>{</span>  <span class=o>}</span>
+
+  <span class=nd>@After</span><span class=o>(</span><span class=s>&#34;triangleJointPoint()&#34;</span><span class=o>)</span>
+  <span class=kd>public</span> <span class=kt>void</span> <span class=nf>afterCreatingTriangleAdvice</span><span class=o>(</span><span class=n>JoinPoint</span> <span class=n>joinPoint</span><span class=o>)</span> <span class=o>{</span>
+    <span class=n>Triangle</span> <span class=n>instance</span> <span class=o>=</span> <span class=o>(</span><span class=n>Triangle</span><span class=o>)</span> <span class=n>joinPoint</span><span class=o>.</span><span class=na>getTarget</span><span class=o>();</span>
+    <span class=n>Optional</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span> <span class=n>op</span> <span class=o>=</span> <span class=n>instance</span><span class=o>.</span><span class=na>validateTheTriangle</span><span class=o>();</span>
+    <span class=k>if</span> <span class=o>(</span><span class=n>op</span><span class=o>.</span><span class=na>isPresent</span><span class=o>())</span> <span class=o>{</span>
+      <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;Invalid due to: &#34;</span> <span class=o>+</span> <span class=n>op</span><span class=o>.</span><span class=na>get</span><span class=o>());</span>
+    <span class=o>}</span> <span class=k>else</span> <span class=o>{</span>
+      <span class=n>logger</span><span class=o>.</span><span class=na>info</span><span class=o>(</span><span class=s>&#34;Valid!&#34;</span><span class=o>);</span>
+    <span class=o>}</span>
+  <span class=o>}</span>
+<span class=o>}</span>
+</code></pre></td></tr></table>
+</div>
+</div><br>
+<p>在測試中看看結果</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=kn>import</span> <span class=nn>org.example.entity.Triangle</span><span class=o>;</span>
+<span class=kn>import</span> <span class=nn>org.junit.jupiter.api.Test</span><span class=o>;</span>
+
+<span class=kd>class</span> <span class=nc>RawTest</span> <span class=o>{</span>
+  <span class=nd>@Test</span>
+  <span class=kt>void</span> <span class=nf>testValidTriangle</span><span class=o>()</span> <span class=o>{</span>
+    <span class=n>Triangle</span> <span class=n>triangle</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Triangle</span><span class=o>(</span><span class=k>new</span> <span class=kt>float</span><span class=o>[]{</span><span class=n>12F</span><span class=o>,</span> <span class=n>13F</span><span class=o>,</span> <span class=n>14F</span><span class=o>});</span>
+  <span class=o>}</span>
+  <span class=c1>// Output:
+</span><span class=c1></span>  <span class=c1>// Nov 28, 2022 4:50:48 PM org.example.aop.TriangleAspect afterCreatingTriangleAdvice
+</span><span class=c1></span>  <span class=c1>// INFO: Valid! 
+</span><span class=c1></span>
+  <span class=nd>@Test</span>
+  <span class=kt>void</span> <span class=nf>testInValidTriangle</span><span class=o>()</span> <span class=o>{</span>
+    <span class=n>Triangle</span> <span class=n>triangle</span> <span class=o>=</span> <span class=k>new</span> <span class=n>Triangle</span><span class=o>(</span><span class=k>new</span> <span class=kt>float</span><span class=o>[]{</span><span class=n>50F</span><span class=o>,</span> <span class=n>13F</span><span class=o>,</span> <span class=n>14F</span><span class=o>});</span>
+  <span class=o>}</span>
+  <span class=c1>// Output:
+</span><span class=c1></span>  <span class=c1>// Nov 28, 2022 4:48:21 PM org.example.aop.TriangleAspect afterCreatingTriangleAdvice
+</span><span class=c1></span>  <span class=c1>// INFO: Invalid due to: The sides cannot form a triangle.
+</span><span class=c1></span><span class=o>}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到在呼叫 new 的時候，我們成功的執行了在 <code>Triangle</code> 裡面的檢查 (<code>validateTheTriangle</code>)，這樣一來就可以利用 AOP 的方式來判斷三角形是不是合理的。</p>
+<br>
+<h2 id=總結a-idconclusiona>總結<a id=conclusion></a></h2>
+<ul>
+<li>
+<p>剖面導向程式設計 AOP ( Aspect-Oriented Programming ) 是一種設計方式，旨在將橫切關注點與業務主體分離，提高分離程度。</p>
+</li>
+<li>
+<p>AOP 相關的概念：Join point, Pointcut, Advice & Aspect。</p>
+</li>
+<li>
+<p>AspectJ 是一種實現 AOP 的 Java 擴充套件。相關的套件還有 <a href=https://docs.spring.io/spring-framework/docs/2.5.5/reference/aop.html>Spring AOP</a>。</p>
+</li>
+<li>
+<p>AOP 可以利用的情境有 Tracing, Profiling & Logging, Pre- and Post- conditions 等等，可以參考官方列出的 <a href=https://www.eclipse.org/aspectj/doc/released/progguide/starting-development.html>情境</a>。</p>
+</li>
+</ul>
+<br>
+<h2 id=參考a-idrefsa>參考<a id=refs></a></h2>
+<ul>
+<li>
+<p><a href=https://openhome.cc/Gossip/SpringGossip/AOPConcept.html target=_blank rel="noopener noreffer">AOP 觀念與術語</a></p>
+</li>
+<li>
+<p><a href=https://www.baeldung.com/aspectj target=_blank rel="noopener noreffer">Intro to AspectJ</a></p>
+</li>
+<li>
+<p><a href=https://bingdoal.github.io/backend/2020/11/aop-and-point-cut-in-spring-boot/ target=_blank rel="noopener noreffer">AOP 與 Pointcut 淺談</a></p>
+</li>
+<li>
+<p><a href=https://chikuwa-tech-study.blogspot.com/2021/06/spring-boot-aop-introduction.html target=_blank rel="noopener noreffer">【Spring Boot】第20課－切面導向程式設計（AOP）</a></p>
+</li>
+<li>
+<p><a href=https://www.baeldung.com/spring-aop-pointcut-tutorial target=_blank rel="noopener noreffer">Introduction to Pointcut Expressions in Spring</a></p>
+</li>
+<li>
+<p><a href=https://cloud.tencent.com/developer/article/1497814 target=_blank rel="noopener noreffer">【小家Spring】Spring AOP中@Pointcut切入点表达式最全面使用介绍</a></p>
+</li>
+<li>
+<p><a href=https://tech-blog.cymetrics.io/posts/maxchiu/aop/ target=_blank rel="noopener noreffer">來談談 AOP (Aspect-Oriented Programming) 的精神與各種主流實現模式的差異</a></p>
+</li>
+</ul></div><div class=post-footer id=post-footer>
+<div class=post-info>
+<div class=post-info-line>
+<div class=post-info-mod>
+<span>Updated on 2022-11-26</span>
+</div>
+<div class=post-info-license></div>
+</div>
+<div class=post-info-line>
+<div class=post-info-md><span>
+<a class=link-to-markdown href=/aspectj/index.md target=_blank>Read Markdown</a>
+</span></div>
+<div class=post-info-share>
+<span><a href=javascript:void(0); title="Share on Twitter" data-sharer=twitter data-url=https://carrican.github.io/aspectj/ data-title="Intro to AOP & AspectJ" data-hashtags=Java,Design,AOP,weaving,aspect,joinpoint,pointcut,advice,logging,immutable,domain><i class="fab fa-twitter fa-fw"></i></a><a href=javascript:void(0); title="Share on Facebook" data-sharer=facebook data-url=https://carrican.github.io/aspectj/ data-hashtag=Java><i class="fab fa-facebook-square fa-fw"></i></a><a href=javascript:void(0); title="Share on WhatsApp" data-sharer=whatsapp data-url=https://carrican.github.io/aspectj/ data-title="Intro to AOP & AspectJ" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href=javascript:void(0); title="Share on Line" data-sharer=line data-url=https://carrican.github.io/aspectj/ data-title="Intro to AOP & AspectJ"><i data-svg-src=/lib/simple-icons/icons/line.min.svg></i></a></span>
+</div>
+</div>
+</div>
+<div class=post-info-more>
+<section class=post-tags><i class="fas fa-tags fa-fw"></i>&nbsp;<a href=/tags/java/>Java</a>,&nbsp;<a href=/tags/design/>Design</a>,&nbsp;<a href=/tags/aop/>AOP</a>,&nbsp;<a href=/tags/weaving/>weaving</a>,&nbsp;<a href=/tags/aspect/>aspect</a>,&nbsp;<a href=/tags/joinpoint/>joinpoint</a>,&nbsp;<a href=/tags/pointcut/>pointcut</a>,&nbsp;<a href=/tags/advice/>advice</a>,&nbsp;<a href=/tags/logging/>logging</a>,&nbsp;<a href=/tags/immutable/>immutable</a>,&nbsp;<a href=/tags/domain/>domain</a></section>
+<section>
+<span><a href=javascript:void(0); onclick=window.history.back()>Back</a></span>&nbsp;|&nbsp;<span><a href=/>Home</a></span>
+</section>
+</div>
+<div class=post-nav><a href=/state-machine/ class=prev rel=prev title="進入設計模式的世界 -- 狀態機模式 ( State pattern )"><i class="fas fa-angle-left fa-fw"></i>進入設計模式的世界 -- 狀態機模式 ( State pattern )</a></div>
+</div>
+<div id=comments></div></article></div>
+</main><footer class=footer>
+<div class=footer-container><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=/ target=_blank>Darren</a></span><span class=icp-splitter>&nbsp;|&nbsp;</span><br class=icp-br>
+<span class=icp>all right reserved.</span></div>
+</div>
+</footer></div>
+<div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title="Back to Top">
+<i class="fas fa-arrow-up fa-fw"></i>
+</a><a href=# id=view-comments class=fixed-button title="View Comments">
+<i class="fas fa-comment fa-fw"></i>
+</a>
+</div><link rel=stylesheet href=/lib/katex/katex.min.css><link rel=stylesheet href=/lib/katex/copy-tex.min.css><link rel=stylesheet href=/lib/cookieconsent/cookieconsent.min.css><script type=text/javascript src=/lib/smooth-scroll/smooth-scroll.min.js></script><script type=text/javascript src=/lib/autocomplete/autocomplete.min.js></script><script type=text/javascript src=/lib/lunr/lunr.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=/lib/clipboard/clipboard.min.js></script><script type=text/javascript src=/lib/sharer/sharer.min.js></script><script type=text/javascript src=/lib/katex/katex.min.js></script><script type=text/javascript src=/lib/katex/auto-render.min.js></script><script type=text/javascript src=/lib/katex/copy-tex.min.js></script><script type=text/javascript src=/lib/katex/mhchem.min.js></script><script type=text/javascript src=/lib/cookieconsent/cookieconsent.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"Copy to clipboard",maxShownLines:200},comment:{},cookieconsent:{content:{dismiss:"Got it!",link:"Learn more",message:"This website uses Cookies to improve your experience."},enable:!0,palette:{button:{background:"#f0f0f0"},popup:{background:"#1aa3ff"}},theme:"edgeless"},math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{highlightTag:"em",lunrIndexURL:"/index.json",maxResultLength:10,noResultsFound:"No results found",snippetLength:30,type:"lunr"}}</script><script type=text/javascript src=/js/theme.min.js></script></body>
+</html>
